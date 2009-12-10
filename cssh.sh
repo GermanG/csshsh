@@ -2,6 +2,7 @@
 
 #set -x 
 
+#We need some default definitions
 HOST_N=1
 STAY_TAXI="no"
 USE_TAXI="no"
@@ -13,6 +14,7 @@ PATH_ENV=~/bin/:$PATH_ENV
 TAXI_SERVER=10.0.0.102
 MAXHOSTS=35
 
+#csshshrc its a way to alter 
 . ~/.csshshrc
 
 [ -z "$TAXI_USER" ] && TAXI_USER=$_SSH_USER
