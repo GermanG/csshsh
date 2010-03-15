@@ -2,7 +2,6 @@
 
 #set -x 
 
-#We need some default definitions
 HOST_N=1
 STAY_TAXI="no"
 USE_TAXI="no"
@@ -12,9 +11,8 @@ PROXY="no"
 _SSH_USER="sysop"
 PATH_ENV=~/bin/:$PATH_ENV
 TAXI_SERVER=10.0.0.102
-MAXHOSTS=35
+MAXHOSTS=56
 
-#csshshrc its a way to alter 
 . ~/.csshshrc
 
 [ -z "$TAXI_USER" ] && TAXI_USER=$_SSH_USER
@@ -43,22 +41,22 @@ do
 	      echo '-p / usar proxy';
 	      echo '-i / usar taxi default: '$TAXI_SERVER;
 	      echo '-t <taxi> / usar taxi <taxi> ';
-	      echo '-q <user> / taxi user ';
+	      echo '-q <user> / remote user ( taxi -> equipo ) ';
 	      echo '-x <ANCHOxALTO> / dimensiones';
 	      echo '-o OFFSET ';
 	      exit;;
   esac
 done
 
-echo stay taxi: $STAY_TAXI
-export STAY_TAXI CONSOLA PROXY _SSH_USER USE_TAXI PATH_ENV TAXI_USER TAXI_SERVER
-
 shift `expr $OPTIND - 1`
+
+HOSTS_COUNT=0
 
 if [ -f $1 ] 
 then
 HOSTS_TMP=`cat $1`
-  if [ $(cat $1 | wc -w ) -gt $MAXHOSTS ]
+HOSTS_COUNT=$(cat $1 | wc -w )
+  if [ $HOSTS_COUNT -gt $MAXHOSTS ]
   then
     echo "too many hosts (MAX $MAXHOSTS)"
     exit 1
@@ -67,6 +65,10 @@ else
 HOSTS_TMP=$*
 fi
 
+let HOSTS_COUNT=$HOSTS_COUNT+1
+
+export STAY_TAXI CONSOLA PROXY _SSH_USER USE_TAXI PATH_ENV TAXI_USER TAXI_SERVER HOSTS_COUNT
+
 HOSTS_TMP=`echo $HOSTS_TMP | sed -e 's/,/ /g' -e 's/and/ /g'`
 
 for i in `echo ${HOST_N} | awk '{for(i=1;i<=$1;i++) print i;}'`
@@ -74,6 +76,10 @@ do
   HOSTS="${HOSTS} ${HOSTS_TMP}"
 done
 
+if [ ${HOST_N} -gt 1 ]
+then
+  let  HOSTS_COUNT=$HOSTS_COUNT*$HOST_N
+fi 
 
 nohup cssh ${HOSTS} &
 
