@@ -24,14 +24,29 @@ then
   proxy="tsocks "
 fi
 
-## THE CONSOLE IMPLEMENTATION WAS REMOVED
-## WE NEED A FLEXIBLE ONE, NOT HARDCODED
-
-ssh="$proxy ssh $taxi $destino"
+if  [ "`echo $* | grep -i -- "-dr$"`" ]
+then 
+  if [ "$CONSOLA" = "si" ] 
+  then
+    telnet=`$proxy ssh ${_SSH_USER}@disops3 /axphome/ggutie/bin/crqst $4 2>&- | grep telnet| sed 's/.*telnet//'`
+    echo telnet $telnet
+  fi
+  # ssh="ssh -C $proxy -t ggutie@148.172.70.21 $destino"
+  ssh="$proxy telnet 148.172.70.11"
+  # ssh="ssh -C $proxy $taxi ssh smpiv001 $destino"
+else 
+  if [ "$CONSOLA" = "si" ] 
+  then
+    ssh="$proxy ssh $taxi /axphome/ggutie/bin/consola.sh $4"
+  else
+    ssh="$proxy ssh $taxi $destino"
+  fi
+fi
 
 echo $ssh
-read n
-let x=$RANDOM%10
+# read n
+let x=$RANDOM%$HOSTS_COUNT
+echo sleep $x
 sleep $x
 
 $ssh
